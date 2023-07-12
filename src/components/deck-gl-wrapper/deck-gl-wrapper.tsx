@@ -92,6 +92,8 @@ type DeckGlI3sProps = {
    * if is not set `viewState` state variable will be used
    */
   parentViewState?: ViewStateSet;
+  /** Minimap visibility */
+  showMinimap?: boolean;
   /** If should create independent viewport for minimap */
   createIndependentMinimapViewport?: boolean;
   /** Terrain visibility */
@@ -179,6 +181,7 @@ type DeckGlI3sProps = {
 export const DeckGlWrapper = ({
   id,
   parentViewState,
+  showMinimap,
   createIndependentMinimapViewport = false,
   showTerrain = false,
   mapStyle,
@@ -219,7 +222,6 @@ export const DeckGlWrapper = ({
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   onTileUnload = () => {},
 }: DeckGlI3sProps) => {
-  const showMinimap = useAppSelector(selectMiniMap);
   const dragMode = useAppSelector(selectDragMode);
   const VIEWS = useMemo(
     () => [

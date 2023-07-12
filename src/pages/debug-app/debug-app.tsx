@@ -750,6 +750,7 @@ export const DebugApp = () => {
   }, []);
 
   const {
+    minimap,
     minimapViewport,
     tileColorMode,
     boundingVolume,
@@ -766,6 +767,7 @@ export const DebugApp = () => {
       {renderTilePanel()}
       <DeckGlWrapper
         id="debug-deck-container"
+        showMinimap={minimap}
         createIndependentMinimapViewport={minimapViewport}
         parentViewState={{
           ...viewState,
