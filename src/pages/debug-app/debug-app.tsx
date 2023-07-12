@@ -83,6 +83,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { setDragMode } from "../../redux/slices/drag-mode-slice";
 import { setColorsByAttrubute } from "../../redux/slices/colors-by-attribute-slice";
+import { setMiniMap } from "../../redux/slices/mini-map-slice";
 
 const INITIAL_VIEW_STATE = {
   main: {
@@ -688,6 +689,9 @@ export const DebugApp = () => {
         | BoundingVolumeType
         | boolean
     ) => {
+      if (optionName === "minimap") {
+        dispatch(setMiniMap(Boolean(value)));
+      }
       setDebugOptions((prevValues) => ({
         ...prevValues,
         [optionName]: value,
@@ -746,7 +750,6 @@ export const DebugApp = () => {
   }, []);
 
   const {
-    minimap,
     minimapViewport,
     tileColorMode,
     boundingVolume,
@@ -763,7 +766,6 @@ export const DebugApp = () => {
       {renderTilePanel()}
       <DeckGlWrapper
         id="debug-deck-container"
-        showMinimap={minimap}
         createIndependentMinimapViewport={minimapViewport}
         parentViewState={{
           ...viewState,

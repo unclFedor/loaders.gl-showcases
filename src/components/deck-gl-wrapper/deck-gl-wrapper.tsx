@@ -46,6 +46,7 @@ import { getLonLatWithElevationOffset } from "../../utils/elevation-utils";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { selectColorsByAttribute } from "../../redux/slices/colors-by-attribute-slice";
 import { selectDragMode } from "../../redux/slices/drag-mode-slice";
+import { selectMiniMap } from "../../redux/slices/mini-map-slice";
 import {
   fetchUVDebugTexture,
   selectUVDebugTexture,
@@ -91,8 +92,6 @@ type DeckGlI3sProps = {
    * if is not set `viewState` state variable will be used
    */
   parentViewState?: ViewStateSet;
-  /** Minimap visibility */
-  showMinimap?: boolean;
   /** If should create independent viewport for minimap */
   createIndependentMinimapViewport?: boolean;
   /** Terrain visibility */
@@ -180,7 +179,6 @@ type DeckGlI3sProps = {
 export const DeckGlWrapper = ({
   id,
   parentViewState,
-  showMinimap,
   createIndependentMinimapViewport = false,
   showTerrain = false,
   mapStyle,
@@ -221,6 +219,7 @@ export const DeckGlWrapper = ({
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   onTileUnload = () => {},
 }: DeckGlI3sProps) => {
+  const showMinimap = useAppSelector(selectMiniMap);
   const dragMode = useAppSelector(selectDragMode);
   const VIEWS = useMemo(
     () => [
@@ -251,7 +250,7 @@ export const DeckGlWrapper = ({
             },
       }),
     ],
-    [disableController, dragMode]
+    [disableController, dragMode, showMinimap]
   );
   const [viewState, setViewState] = useState<ViewStateSet>({
     main: INITIAL_VIEW_STATE,
