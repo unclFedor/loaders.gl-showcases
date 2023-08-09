@@ -6,7 +6,6 @@ import {
   Sublayer,
   TilesetType,
   ActiveButton,
-  BaseMap,
   ViewStateSet,
   LayerViewState,
   ListItemType,
@@ -32,7 +31,6 @@ import { v4 as uuidv4 } from "uuid";
 import { Stats } from "@probe.gl/stats";
 
 import { EXAMPLES } from "../../constants/i3s-examples";
-import { BASE_MAPS } from "../../constants/map-styles";
 import { SemanticValidator, DebugPanel } from "../../components";
 import { TileTooltip } from "../../components/tile-tooltip/tile-tooltip";
 import { IS_LOADED_DELAY } from "../../constants/common";
@@ -96,6 +94,11 @@ import {
   selectBoundingVolumeColorMode,
   selectBoundingVolumeType,
 } from "../../redux/slices/debug-options-slice";
+import {
+  selectBaseMaps,
+  selectSelectedBaseMaps,
+  setInitialBaseMaps,
+} from "../../redux/slices/base-maps-slice";
 
 const INITIAL_VIEW_STATE = {
   main: {
@@ -183,13 +186,14 @@ export const DebugApp = () => {
   const [activeLayers, setActiveLayers] = useState<LayerExample[]>([]);
   const [viewState, setViewState] = useState<ViewStateSet>(INITIAL_VIEW_STATE);
   const [sublayers, setSublayers] = useState<ActiveSublayer[]>([]);
-  const [baseMaps, setBaseMaps] = useState<BaseMap[]>(BASE_MAPS);
-  const [selectedBaseMap, setSelectedBaseMap] = useState<BaseMap>(BASE_MAPS[0]);
   const [buildingExplorerOpened, setBuildingExplorerOpened] =
     useState<boolean>(false);
 
   const [, setSearchParams] = useSearchParams();
   const dispatch = useAppDispatch();
+  const baseMaps = useAppSelector(selectBaseMaps);
+  const selectedBaseMapId = useAppSelector(selectSelectedBaseMaps);
+  const selectedBaseMap = baseMaps.find((map) => map.id === selectedBaseMapId);
 
   const selectedLayerIds = useMemo(
     () => activeLayers.map((layer) => layer.id),
@@ -224,6 +228,9 @@ export const DebugApp = () => {
     setActiveLayers([newActiveLayer]);
     dispatch(setColorsByAttrubute(null));
     dispatch(setDragMode(DragMode.pan));
+    return () => {
+      dispatch(setInitialBaseMaps());
+    };
   }, []);
 
   /**
@@ -546,27 +553,6 @@ export const DebugApp = () => {
     }
   };
 
-  const onInsertBaseMapHandler = (baseMap: BaseMap) => {
-    setBaseMaps((prevValues) => [...prevValues, baseMap]);
-    setSelectedBaseMap(baseMap);
-  };
-
-  const onSelectBaseMapHandler = (baseMapId: string) => {
-    const baseMap = baseMaps.find((map) => map.id === baseMapId);
-
-    if (baseMap) {
-      setSelectedBaseMap(baseMap);
-    }
-  };
-
-  const onDeleteBaseMapHandler = (baseMapId: string) => {
-    setBaseMaps((prevValues) =>
-      prevValues.filter((baseMap) => baseMap.id !== baseMapId)
-    );
-
-    setSelectedBaseMap(BASE_MAPS[0]);
-  };
-
   const onViewStateChangeHandler = (viewStateSet: ViewStateSet) => {
     setViewState(viewStateSet);
   };
@@ -775,8 +761,8 @@ export const DebugApp = () => {
             ...viewState.main,
           },
         }}
-        showTerrain={selectedBaseMap.id === "Terrain"}
-        mapStyle={selectedBaseMap.mapUrl}
+        showTerrain={selectedBaseMap?.id === "Terrain"}
+        mapStyle={selectedBaseMap?.mapUrl}
         tileColorMode={useAppSelector(selectTileColorMode)}
         coloredTilesMap={coloredTilesMap}
         normalsTrianglesPercentage={trianglesPercentage}
@@ -849,14 +835,9 @@ export const DebugApp = () => {
             sublayers={sublayers}
             onUpdateSublayerVisibility={onUpdateSublayerVisibilityHandler}
             onClose={() => onChangeMainToolsPanelHandler(ActiveButton.options)}
-            baseMaps={baseMaps}
-            selectedBaseMapId={selectedBaseMap.id}
             onBuildingExplorerOpened={(opened) =>
               setBuildingExplorerOpened(opened)
             }
-            insertBaseMap={onInsertBaseMapHandler}
-            selectBaseMap={onSelectBaseMapHandler}
-            deleteBaseMap={onDeleteBaseMapHandler}
           />
         </RightSidePanelWrapper>
       )}
